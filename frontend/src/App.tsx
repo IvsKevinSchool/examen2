@@ -1,35 +1,92 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Layout from './components/Layout/Layout';
+import Dashboard from './components/Dashboard/Dashboard';
+import { TodoList } from './components/TodoList/TodoList';
+import { TodoForm } from './components/TodoForm/TodoForm';
+import type { Todo } from './types/api';
+import './App.css';
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+type View = 'dashboard' | 'todos' | 'categories';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [showTodoForm, setShowTodoForm] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | undefined>();
+
+  const handleCreateTodo = () => {
+    setEditingTodo(undefined);
+    setShowTodoForm(true);
+  };
+
+  const handleEditTodo = (todo: Todo) => {
+    setEditingTodo(todo);
+    setShowTodoForm(true);
+  };
+
+  const handleCloseTodoForm = () => {
+    setShowTodoForm(false);
+    setEditingTodo(undefined);
+  };
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return (
+          <Dashboard 
+            onCreateTodo={handleCreateTodo}
+            onViewTodos={() => setCurrentView('todos')}
+          />
+        );
+      case 'todos':
+        return (
+          <TodoList 
+            onCreateTodo={handleCreateTodo}
+            onEditTodo={handleEditTodo}
+          />
+        );
+      case 'categories':
+        return (
+          <div className="coming-soon">
+            <h2>Gestión de Categorías</h2>
+            <p>Esta funcionalidad estará disponible próximamente.</p>
+          </div>
+        );
+      default:
+        return <Dashboard onCreateTodo={handleCreateTodo} />;
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <QueryClientProvider client={queryClient}>
+      <div className="App">
+        <Layout 
+          currentView={currentView}
+          onNavigate={setCurrentView}
+        >
+          {renderContent()}
+        </Layout>
+
+        {/* Todo Form Modal */}
+        {showTodoForm && (
+          <TodoForm
+            todo={editingTodo}
+            onClose={handleCloseTodoForm}
+          />
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
