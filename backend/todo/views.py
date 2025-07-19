@@ -198,6 +198,138 @@ class TodoViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(overdue_todos, many=True)
         return Response(serializer.data)
 
+    # Endpoints específicos para listas según requerimientos
+    @action(detail=False, methods=['get'], url_path='pending-ids')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes (solo IDs)",
+        responses={200: openapi.Response('Lista de IDs', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(type=openapi.TYPE_INTEGER)
+        ))}
+    )
+    def pending_ids(self, request):
+        """Lista de todos los pendientes (solo IDs)"""
+        pending_todos = Todo.objects.filter(status='pending').values_list('id', flat=True)
+        return Response(list(pending_todos))
+
+    @action(detail=False, methods=['get'], url_path='pending-titles')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes (IDs y Titles)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'title': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )
+        ))}
+    )
+    def pending_titles(self, request):
+        """Lista de todos los pendientes (IDs y Titles)"""
+        pending_todos = Todo.objects.filter(status='pending').values('id', 'title')
+        return Response(list(pending_todos))
+
+    @action(detail=False, methods=['get'], url_path='pending-unresolved')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes sin resolver (ID y Title)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'title': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )
+        ))}
+    )
+    def pending_unresolved(self, request):
+        """Lista de todos los pendientes sin resolver (ID y Title)"""
+        pending_todos = Todo.objects.filter(
+            status__in=['pending', 'in_progress']
+        ).values('id', 'title')
+        return Response(list(pending_todos))
+
+    @action(detail=False, methods=['get'], url_path='pending-resolved')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes resueltos (ID y Title)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'title': openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )
+        ))}
+    )
+    def pending_resolved(self, request):
+        """Lista de todos los pendientes resueltos (ID y Title)"""
+        resolved_todos = Todo.objects.filter(status='completed').values('id', 'title')
+        return Response(list(resolved_todos))
+
+    @action(detail=False, methods=['get'], url_path='pending-users')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes (IDs y userID)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'user': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True)
+                }
+            )
+        ))}
+    )
+    def pending_users(self, request):
+        """Lista de todos los pendientes (IDs y userID)"""
+        pending_todos = Todo.objects.filter(status='pending').values('id', 'user')
+        return Response(list(pending_todos))
+
+    @action(detail=False, methods=['get'], url_path='resolved-users')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes resueltos (ID y userID)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'user': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True)
+                }
+            )
+        ))}
+    )
+    def resolved_users(self, request):
+        """Lista de todos los pendientes resueltos (ID y userID)"""
+        resolved_todos = Todo.objects.filter(status='completed').values('id', 'user')
+        return Response(list(resolved_todos))
+
+    @action(detail=False, methods=['get'], url_path='unresolved-users')
+    @swagger_auto_schema(
+        operation_description="Lista de todos los pendientes sin resolver (ID y userID)",
+        responses={200: openapi.Response('Lista de tareas', openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'user': openapi.Schema(type=openapi.TYPE_INTEGER, nullable=True)
+                }
+            )
+        ))}
+    )
+    def unresolved_users(self, request):
+        """Lista de todos los pendientes sin resolver (ID y userID)"""
+        unresolved_todos = Todo.objects.filter(
+            status__in=['pending', 'in_progress']
+        ).values('id', 'user')
+        return Response(list(unresolved_todos))
+
 
 @swagger_auto_schema(tags=['Categories'])
 class TodoCategoryViewSet(viewsets.ModelViewSet):

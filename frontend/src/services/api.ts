@@ -51,12 +51,38 @@ export const todoApi = {
     }
     
     const response = await api.get(`/todos/?${params.toString()}`);
+    
+    // Check if response is already paginated or if it's a simple array
+    if (Array.isArray(response.data)) {
+      // Backend returned simple array, wrap it in pagination format
+      return {
+        count: response.data.length,
+        next: undefined,
+        previous: undefined,
+        results: response.data
+      };
+    }
+    
+    // Backend returned paginated response
     return response.data;
   },
 
   // Get all categories
   getCategories: async (): Promise<PaginatedResponse<TodoCategory>> => {
     const response = await api.get('/categories/');
+    
+    // Check if response is already paginated or if it's a simple array
+    if (Array.isArray(response.data)) {
+      // Backend returned simple array, wrap it in pagination format
+      return {
+        count: response.data.length,
+        next: undefined,
+        previous: undefined,
+        results: response.data
+      };
+    }
+    
+    // Backend returned paginated response
     return response.data;
   },
 
