@@ -1,53 +1,100 @@
-# React + TypeScript + Vite
+# ToDo Management System - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React TypeScript frontend for the ToDo Management System, built with Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ Create, edit, and delete tasks
+- 📋 Organize tasks with categories
+- 🎯 Set priorities (Low, Medium, High, Urgent)
+- ⏰ Track task status (Pending, In Progress, Completed, Cancelled)
+- 📊 Dashboard with statistics and charts
+- 🔍 Filter and search tasks
+- 📱 Responsive design
+- 🎨 Clean and modern UI
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **React 19** - Frontend framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **TanStack Query** - Server state management
+- **Axios** - HTTP client
+- **Lucide React** - Icons
+- **CSS3** - Styling
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Node.js (v18 or higher)
+- npm or yarn
+- Backend API running on `http://127.0.0.1:8000`
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Installation
+
+1. Install dependencies:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Start the development server:
+```bash
+npm run dev
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application will be available at `http://localhost:3000`
 
-export default tseslint.config([
-  globalIgnores(['dist']),
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── Dashboard/      # Dashboard component
+│   ├── TodoList/       # Todo list component
+│   ├── TodoForm/       # Todo form component
+│   └── UI/             # Reusable UI components
+├── hooks/              # Custom React hooks
+├── services/           # API services
+├── types/              # TypeScript type definitions
+└── assets/             # Static assets
+```
+
+## API Integration
+
+The frontend communicates with the Django REST API backend through:
+- Axios HTTP client with base URL `/api`
+- TanStack Query for state management and caching
+- TypeScript interfaces for type safety
+
+## Environment Configuration
+
+The application uses Vite's proxy configuration to route API calls to the backend:
+
+```typescript
+// vite.config.ts
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://127.0.0.1:8000',
+      changeOrigin: true,
+      secure: false,
+    }
+  }
+}
+```
+
+## Contributing
+
+1. Follow TypeScript best practices
+2. Use the existing component structure
+3. Maintain consistent styling patterns
+4. Ensure proper error handling
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

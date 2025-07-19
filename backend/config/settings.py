@@ -157,6 +157,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
 
-# Configuración de zona horaria para EcoTrash
+# Time zone configuration for ToDo system
 LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'America/Mexico_City'

@@ -1,12 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { todoApi, categoryApi } from '../services/api';
 import type { 
-  Todo, 
   TodoCategory, 
   CreateTodoRequest, 
   UpdateTodoRequest, 
-  TodoFilters,
-  TodoStats
+  TodoFilters
 } from '../types/api';
 
 // Query keys
