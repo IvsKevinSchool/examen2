@@ -10,7 +10,7 @@ router.register(r'attachments', views.TodoAttachmentViewSet)
 
 # Definir patrones de URL
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
 
 # URLs adicionales personalizadas si las necesitas

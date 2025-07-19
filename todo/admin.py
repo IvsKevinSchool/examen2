@@ -6,25 +6,22 @@ from .models import Todo, TodoCategory, TodoAttachment
 class TodoAdmin(admin.ModelAdmin):
     """Configuración del admin para ToDo"""
     list_display = [
-        'title', 'status', 'priority', 'is_eco_related', 
+        'title', 'status', 'priority', 'category', 
         'user', 'created_at', 'due_date', 'is_overdue'
     ]
     list_filter = [
-        'status', 'priority', 'is_eco_related', 'created_at', 'due_date'
+        'status', 'priority', 'category', 'created_at', 'due_date', 'user'
     ]
-    search_fields = ['title', 'description', 'eco_category']
+    search_fields = ['title', 'description', 'category__name']
     readonly_fields = ['created_at', 'updated_at', 'completed_at']
+    autocomplete_fields = ['category', 'user']
     
     fieldsets = (
         ('Información Principal', {
-            'fields': ('title', 'description', 'user')
+            'fields': ('title', 'description', 'user', 'category')
         }),
         ('Estado y Prioridad', {
             'fields': ('status', 'priority', 'due_date')
-        }),
-        ('EcoTrash', {
-            'fields': ('is_eco_related', 'eco_category'),
-            'classes': ('collapse',)
         }),
         ('Fechas', {
             'fields': ('created_at', 'updated_at', 'completed_at'),
@@ -37,14 +34,23 @@ class TodoAdmin(admin.ModelAdmin):
         return obj.is_overdue()
     is_overdue.boolean = True
     is_overdue.short_description = 'Vencida'
+    
+    def get_queryset(self, request):
+        """Optimizar consultas"""
+        return super().get_queryset(request).select_related('category', 'user')
 
 
 @admin.register(TodoCategory)
 class TodoCategoryAdmin(admin.ModelAdmin):
     """Configuración del admin para categorías"""
-    list_display = ['name', 'description', 'color', 'created_at']
+    list_display = ['name', 'description', 'color', 'icon', 'tasks_count', 'created_at']
     search_fields = ['name', 'description']
     readonly_fields = ['created_at']
+    
+    def tasks_count(self, obj):
+        """Mostrar número de tareas en esta categoría"""
+        return obj.todo_set.count()
+    tasks_count.short_description = 'Número de tareas'
 
 
 @admin.register(TodoAttachment)
@@ -54,3 +60,4 @@ class TodoAttachmentAdmin(admin.ModelAdmin):
     list_filter = ['uploaded_at']
     search_fields = ['filename', 'todo__title']
     readonly_fields = ['uploaded_at']
+    autocomplete_fields = ['todo']

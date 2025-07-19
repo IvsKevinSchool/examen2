@@ -13,33 +13,48 @@ class TodoAttachmentSerializer(serializers.ModelSerializer):
 
 class TodoCategorySerializer(serializers.ModelSerializer):
     """Serializer para categorías de ToDo"""
+    tasks_count = serializers.SerializerMethodField()
     
     class Meta:
         model = TodoCategory
-        fields = ['id', 'name', 'description', 'color', 'created_at']
+        fields = ['id', 'name', 'description', 'color', 'icon', 'created_at', 'tasks_count']
         read_only_fields = ['created_at']
+    
+    def get_tasks_count(self, obj):
+        """Contar tareas en esta categoría"""
+        return obj.todo_set.count()
 
 
 class TodoSerializer(serializers.ModelSerializer):
     """Serializer principal para ToDo"""
     attachments = TodoAttachmentSerializer(many=True, read_only=True)
+    category_details = TodoCategorySerializer(source='category', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     priority_display = serializers.CharField(source='get_priority_display', read_only=True)
     is_overdue = serializers.SerializerMethodField()
+    days_until_due = serializers.SerializerMethodField()
     
     class Meta:
         model = Todo
         fields = [
             'id', 'title', 'description', 'priority', 'priority_display',
             'status', 'status_display', 'created_at', 'updated_at',
-            'due_date', 'completed_at', 'user', 'is_eco_related',
-            'eco_category', 'attachments', 'is_overdue'
+            'due_date', 'completed_at', 'user', 'category', 'category_details',
+            'attachments', 'is_overdue', 'days_until_due'
         ]
         read_only_fields = ['created_at', 'updated_at', 'completed_at']
     
     def get_is_overdue(self, obj):
         """Método para calcular si la tarea está vencida"""
         return obj.is_overdue()
+    
+    def get_days_until_due(self, obj):
+        """Calcular días hasta la fecha límite"""
+        if not obj.due_date:
+            return None
+        from django.utils import timezone
+        delta = obj.due_date.date() - timezone.now().date()
+        return delta.days
     
     def create(self, validated_data):
         """Crear nueva tarea"""
@@ -67,7 +82,7 @@ class TodoCreateSerializer(serializers.ModelSerializer):
         model = Todo
         fields = [
             'title', 'description', 'priority', 'status',
-            'due_date', 'user', 'is_eco_related', 'eco_category'
+            'due_date', 'user', 'category'
         ]
 
 
@@ -98,5 +113,8 @@ class TodoStatsSerializer(serializers.Serializer):
     pending_tasks = serializers.IntegerField()
     completed_tasks = serializers.IntegerField()
     in_progress_tasks = serializers.IntegerField()
+    cancelled_tasks = serializers.IntegerField()
     overdue_tasks = serializers.IntegerField()
-    eco_related_tasks = serializers.IntegerField()
+    completion_rate = serializers.FloatField()
+    tasks_by_priority = serializers.DictField()
+    tasks_by_category = serializers.DictField()

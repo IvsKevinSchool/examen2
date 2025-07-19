@@ -3,12 +3,13 @@ from django.contrib.auth.models import User
 
 class Todo(models.Model):
     """
-    Modelo para las tareas de ToDo del sistema EcoTrash
+    Modelo para las tareas del sistema ToDo
     """
     PRIORITY_CHOICES = [
         ('low', 'Baja'),
         ('medium', 'Media'),
         ('high', 'Alta'),
+        ('urgent', 'Urgente'),
     ]
     
     STATUS_CHOICES = [
@@ -37,7 +38,7 @@ class Todo(models.Model):
     due_date = models.DateTimeField(blank=True, null=True, verbose_name="Fecha límite")
     completed_at = models.DateTimeField(blank=True, null=True, verbose_name="Fecha de completado")
     
-    # Relación con usuario (opcional para futuras versiones)
+    # Relación con usuario
     user = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
@@ -46,14 +47,13 @@ class Todo(models.Model):
         verbose_name="Usuario asignado"
     )
     
-    # Campos específicos para EcoTrash
-    is_eco_related = models.BooleanField(default=False, verbose_name="Relacionado con Eco")
-    eco_category = models.CharField(
-        max_length=50, 
-        blank=True, 
+    # Campos adicionales para organización
+    category = models.ForeignKey(
+        'TodoCategory',
+        on_delete=models.SET_NULL,
+        blank=True,
         null=True,
-        verbose_name="Categoría Eco",
-        help_text="Categoría relacionada con gestión de residuos"
+        verbose_name="Categoría"
     )
     
     class Meta:
@@ -90,6 +90,13 @@ class TodoCategory(models.Model):
         default='#007bff',
         verbose_name="Color",
         help_text="Color en formato hexadecimal (#ffffff)"
+    )
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Icono",
+        help_text="Nombre del icono (ej: work, home, shopping)"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
