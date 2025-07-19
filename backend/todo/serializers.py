@@ -1,5 +1,15 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Todo, TodoCategory, TodoAttachment
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer para usuarios"""
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']
+        read_only_fields = ['id']
 
 
 class TodoAttachmentSerializer(serializers.ModelSerializer):
@@ -29,6 +39,7 @@ class TodoSerializer(serializers.ModelSerializer):
     """Serializer principal para ToDo"""
     attachments = TodoAttachmentSerializer(many=True, read_only=True)
     category_details = TodoCategorySerializer(source='category', read_only=True)
+    user_details = UserSerializer(source='user', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     priority_display = serializers.CharField(source='get_priority_display', read_only=True)
     is_overdue = serializers.SerializerMethodField()
@@ -39,7 +50,7 @@ class TodoSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'priority', 'priority_display',
             'status', 'status_display', 'created_at', 'updated_at',
-            'due_date', 'completed_at', 'user', 'category', 'category_details',
+            'due_date', 'completed_at', 'user', 'user_details', 'category', 'category_details',
             'attachments', 'is_overdue', 'days_until_due'
         ]
         read_only_fields = ['created_at', 'updated_at', 'completed_at']

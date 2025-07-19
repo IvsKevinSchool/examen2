@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { todoApi } from '../../services/api';
+import { todoApi, userApi } from '../../services/api';
 import type { Todo } from '../../types/api';
 import LoadingSpinner from '../UI/LoadingSpinner';
 import ErrorMessage from '../UI/ErrorMessage';
-import { CheckCircle, Circle, Calendar, Flag, Folder, Search, Filter, Plus } from 'lucide-react';
+import { CheckCircle, Circle, Calendar, Flag, Folder, Search, Filter, Plus, User } from 'lucide-react';
 import './TodoList.css';
 
 interface TodoListProps {
@@ -18,6 +18,7 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
     status: '',
     priority: '',
     category: '',
+    user: '',
     ordering: '-created_at'
   });
 
@@ -31,6 +32,7 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
       status: filters.status || undefined,
       priority: filters.priority || undefined,
       category: filters.category ? parseInt(filters.category) : undefined,
+      user: filters.user ? parseInt(filters.user) : undefined,
     }),
     staleTime: 30000,
   });
@@ -39,6 +41,13 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
   const { data: categoriesResponse } = useQuery({
     queryKey: ['categories'],
     queryFn: () => todoApi.getCategories(),
+    staleTime: 300000, // 5 minutes
+  });
+
+  // Fetch users for filter dropdown
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: userApi.getUsers,
     staleTime: 300000, // 5 minutes
   });
 
@@ -52,6 +61,7 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
       status: '',
       priority: '',
       category: '',
+      user: '',
       ordering: '-created_at'
     });
   };
@@ -207,6 +217,25 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
               </select>
             </div>
 
+            {/* User */}
+            <div className="filter-group">
+              <label>Usuario</label>
+              <select
+                value={filters.user}
+                onChange={(e) => handleFilterChange('user', e.target.value)}
+              >
+                <option value="">Todos los usuarios</option>
+                {users?.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.first_name && user.last_name 
+                      ? `${user.first_name} ${user.last_name}`
+                      : user.username
+                    }
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Ordering */}
             <div className="filter-group">
               <label>Ordenar por</label>
@@ -306,6 +335,15 @@ export const TodoList: React.FC<TodoListProps> = ({ onCreateTodo, onEditTodo }) 
                         <span className="category-badge">
                           <Folder size={14} />
                           {todo.category_details.name}
+                        </span>
+                      )}
+                      {todo.user_details && (
+                        <span className="user-badge">
+                          <User size={14} />
+                          {todo.user_details.first_name && todo.user_details.last_name
+                            ? `${todo.user_details.first_name} ${todo.user_details.last_name}`
+                            : todo.user_details.username
+                          }
                         </span>
                       )}
                     </div>

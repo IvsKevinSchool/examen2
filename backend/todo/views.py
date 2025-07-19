@@ -4,12 +4,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.db.models import Q, Count
 from django.utils import timezone
+from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import Todo, TodoCategory, TodoAttachment
 from .serializers import (
     TodoSerializer, TodoCreateSerializer, TodoUpdateStatusSerializer,
-    TodoCategorySerializer, TodoAttachmentSerializer, TodoStatsSerializer
+    TodoCategorySerializer, TodoAttachmentSerializer, TodoStatsSerializer,
+    UserSerializer
 )
 
 
@@ -176,7 +178,7 @@ class TodoViewSet(viewsets.ModelViewSet):
         responses={200: TodoSerializer(many=True)},
         operation_description="Obtener tareas de alta prioridad"
     )
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='high-priority')
     def high_priority(self, request):
         """Obtener tareas de alta prioridad"""
         high_priority_todos = self.get_queryset().filter(priority__in=['high', 'urgent'])
@@ -363,3 +365,21 @@ class TodoAttachmentViewSet(viewsets.ModelViewSet):
         if todo_id:
             queryset = queryset.filter(todo_id=todo_id)
         return queryset
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet de solo lectura para usuarios del sistema
+    Permite obtener la lista de usuarios para asignación de tareas
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None  # Disable pagination for users
+    
+    @swagger_auto_schema(
+        operation_description="Obtener lista de todos los usuarios disponibles para asignación de tareas"
+    )
+    def list(self, request, *args, **kwargs):
+        """Obtener lista de usuarios"""
+        return super().list(request, *args, **kwargs)

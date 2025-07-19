@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register(r'todos', views.TodoViewSet)
 router.register(r'categories', views.TodoCategoryViewSet)
 router.register(r'attachments', views.TodoAttachmentViewSet)
+router.register(r'users', views.UserViewSet)
 
 # Definir patrones de URL
 urlpatterns = [

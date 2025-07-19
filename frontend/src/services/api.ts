@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type {
+  User,
   Todo,
   TodoCategory,
   TodoStats,
@@ -133,7 +134,7 @@ export const todoApi = {
 
   // Get high priority todos
   getHighPriority: async (): Promise<Todo[]> => {
-    const response = await api.get('/todos/high_priority/');
+    const response = await api.get('/todos/high-priority/');
     return response.data;
   },
 
@@ -173,6 +174,19 @@ export const categoryApi = {
   // Delete category
   deleteCategory: async (id: number): Promise<void> => {
     await api.delete(`/categories/${id}/`);
+  },
+};
+
+// User API endpoints
+export const userApi = {
+  // Get all users
+  getUsers: async (): Promise<User[]> => {
+    const response = await api.get('/users/');
+    // Handle both paginated and non-paginated responses
+    if (response.data.results) {
+      return response.data.results;
+    }
+    return response.data;
   },
 };
 

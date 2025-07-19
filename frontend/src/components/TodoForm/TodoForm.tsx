@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { todoApi } from '../../services/api';
+import { todoApi, userApi } from '../../services/api';
 import type { Todo, TodoFormData } from '../../types/api';
 import LoadingSpinner from '../UI/LoadingSpinner';
 import ErrorMessage from '../UI/ErrorMessage';
-import { Save, X, Calendar, Flag, Folder, FileText, AlignLeft } from 'lucide-react';
+import { Save, X, Calendar, Flag, Folder, FileText, AlignLeft, User } from 'lucide-react';
 import './TodoForm.css';
 
 interface TodoFormProps {
@@ -30,6 +30,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
     status: 'pending',
     due_date: '',
     category: '',
+    user: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,6 +39,13 @@ export const TodoForm: React.FC<TodoFormProps> = ({
   const { data: categoriesResponse } = useQuery({
     queryKey: ['categories'],
     queryFn: () => todoApi.getCategories(),
+    staleTime: 300000, // 5 minutes
+  });
+
+  // Fetch users for dropdown
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: userApi.getUsers,
     staleTime: 300000, // 5 minutes
   });
 
@@ -82,6 +90,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
         status: todo.status,
         due_date: todo.due_date ? todo.due_date.split('T')[0] : '',
         category: todo.category || '',
+        user: todo.user || '',
       });
     }
   }, [todo]);
@@ -131,6 +140,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
       status: formData.status,
       due_date: formData.due_date || undefined,
       category: formData.category ? parseInt(formData.category.toString()) : undefined,
+      user: formData.user ? parseInt(formData.user.toString()) : undefined,
     };
 
     if (isEditing && todo) {
@@ -303,6 +313,34 @@ export const TodoForm: React.FC<TodoFormProps> = ({
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Form Row 3: User Assignment */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="user" className="form-label">
+                <User size={16} />
+                Usuario Asignado
+              </label>
+              <select
+                id="user"
+                name="user"
+                value={formData.user}
+                onChange={handleInputChange}
+                className="form-select"
+                disabled={isLoading}
+              >
+                <option value="">Sin asignar</option>
+                {users?.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.first_name && user.last_name 
+                      ? `${user.first_name} ${user.last_name} (${user.username})`
+                      : user.username
+                    }
                   </option>
                 ))}
               </select>

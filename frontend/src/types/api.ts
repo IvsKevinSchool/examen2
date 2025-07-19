@@ -1,5 +1,13 @@
 // Backend API Types for Todo System
 
+export interface User {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 export interface Todo {
   id: number;
   title: string;
@@ -13,6 +21,7 @@ export interface Todo {
   due_date?: string;
   completed_at?: string;
   user?: number;
+  user_details?: User;
   category?: number;
   category_details?: TodoCategory;
   attachments: TodoAttachment[];
@@ -93,6 +102,7 @@ export interface TodoFormData {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   due_date: string;
   category: number | '';
+  user: number | '';
 }
 
 export interface CategoryFormData {
